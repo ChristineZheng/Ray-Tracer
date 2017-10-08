@@ -1,0 +1,10 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/ChristineZheng/cs184/proj3-2-microfacet/proj3-2-microfacet/proj3_2_pathtracer-master-0bfa40cfb599c0d8933c5670a569c4bb0f002c2e/CGL/src/osdfont.c
+

@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 184 Ray Tracer, Part 1</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2017</h1>
+<h1 align="middle">Project 3-2: Ray Tracer, Part 2</h1>
+<h2 align="middle">Christine Guomin Zheng, CS184-aad</h2>
+
+<br><br>
+
+<div>
+
+<h2 align="middle">Overview</h2>
+<p> Expend on project 3-1, we add more complicated materials, environment lights, and depth of field to your ray tracer. It is very interesting to see different materials applied on the mesh with different lighting effects. Depth of field gives very cool images like using a camera.</p>
+
+<br></br>
+
+<h2 align="middle">Part 1: Mirror and Glass Materials</h2>
+
+<p> In part 1, reflection and refraction are implemented and can be visualized via two spheres in the box. Increasing the maximum ray depth increases the maximum number of times a ray can be reflected and refracted. You can see the difference in below images. Below images ran with sample rate of 64 and 4 samples per light. They are a bit noisy due to the low sample rate. </p>
+
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part1/need/sphere_0.png" width="480px" />
+        <figcaption align="middle">m = 0, s = 64, l = 4</figcaption>
+        <figcaption align="middle">When maximum ray depth = 0, no ray can be reflected or refracted, so the mirror and glass material spheres look dark. </figcaption>
+      </tr>
+    </table>
+  </div>
+
+
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part1/need/sphere_1.png" width="480px" />
+        <figcaption align="middle">m = 1, s = 64, l = 4</figcaption>
+        <figcaption align="middle">When maximum ray depth = 1, ray get reflected once on the mirror sphere, so the glass made sphere on the right look darker. The small sphere reflected on the mirror sphere looks dark. </figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part1/need/sphere_2.png" width="480px" />
+        <figcaption align="middle">m = 2, s = 64, l = 4</figcaption>
+        <figcaption align="middle">With secondary refraction and reflection, the glass made sphere looks clear now because the ray get reflected from the mirror sphere onto the glass made sphere. The ray also get reflected from the sphere on the right to the environment. So you can the image overall looks brigher compared to the previous one.</figcaption>
+      </tr>
+    </table>
+  </div>
+    <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part1/need/sphere_3.png" width="480px" />
+        <figcaption align="middle">Increase depth by one, the major difference is that the sphere on the right get reflected on the mirror sphere on the left. So the small sphere appear on the mirror sphere is not dark anymore but blue color. </figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part1/need/sphere_4.png" width="480px" />
+        <figcaption align="middle">m = 4, s = 64, l = 4</figcaption>
+        <figcaption align="middle">At maximum ray depth of 4, the major difference is that the ray from the right sphere get reflected onto the wall on the far right. So there is a small bright spot light on the wall.</figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part1/need/sphere_5.png" width="480px" />
+        <figcaption align="middle">m = 5, s = 64, l = 4</figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part1/need/sphere_100.png" width="480px" />
+        <figcaption align="middle">m = 100, s = 64, l = 4</figcaption>
+        <figcaption align="middle">Overall, increasing the maximum ray depth gives a much brighter image. </figcaption>
+      </tr>
+    </table>
+  </div>
+
+<br></br>
+
+<h2 align="middle">Part 2: Microfacet Material</h2>
+
+<h3 align="middle">Different alpha value</h3>
+<p> Changing alpha value changes the roughness of the mesh material. It describes how the microfacet surface reflects lights in the randomness of the reflection direction. As seen below, the lower the alpha value, the smoother the surface is. It looks more like a mirror. While a rough surface will scatter the reflection in multiple directions. </p>
+
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part2/CBdragon_microfacet_au_alpha=0.5.png" width="480px" />
+        <figcaption align="middle">alpha = 0.5</figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part2/CBdragon_microfacet_au_alpha=0.25.png" width="480px" />
+        <figcaption align="middle">alpha = 0.25</figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part2/CBdragon_microfacet_au_alpha=0.05.png" width="480px" />
+        <figcaption align="middle">alpha = 0.05</figcaption>
+        <figcaption align="middle">The much lower alpha value gives a smoother surface and more mirror like surface. </figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part2/CBdragon_microfacet_au_alpha=0.005.png" width="480px" />
+        <figcaption align="middle">alpha = 0.005</figcaption>
+      </tr>
+    </table>
+  </div>
+
+  <br></br>
+
+<h3 align="middle">cosine hemisphere sampling and importance sampling</h3>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part2/CBbunny_microfacet_cu_cosine_sample.png" width="480px" />
+        <figcaption align="middle">Cosine hemisphere sampling</figcaption>
+        <figcaption align="middle">Using cosine hemisphere sampling gives a more noisier effect compared to importance sampling. Because importance sampling distributes samples where light is expected to have a greater influence. Like a perfect mirror only needs a single direction according to the reflection rule. For cosine hemisphere sampling, it results in some samples at flat angles that is not supposed to have a lower influence. So the samples is a bit more spread out in cosine sampling. </figcaption>
+      </tr>
+    </table>
+  </div>
+
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part2/CBbunny_microfacet_cu_s=64_l=1_m=5_importance_sampling_part2.png" width="480px" />
+        <figcaption align="middle">Importance sampling</figcaption>
+      </tr>
+    </table>
+  </div>
+
+  <br></br>
+
+  <h3 align="middle">Silver material</h3>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part2/-t_8_-s_128_l=4_m=5_CBbunny_microfacet_silver_alpha=0.5.png" width="480px" />
+        <figcaption align="middle">Silver bunny</figcaption>
+        <figcaption align="middle">This silver like material is based on wavelengths of 614nm red, 549 nm green, 466nm blue. Eta are 0.059193, 0.059881, 0.047366 respectively. k are 4.1283, 3.5892, 2.8132 respectively. </figcaption>
+      </tr>
+    </table>
+  </div>
+
+<br></br>
+
+<h2 align="middle">Part 3: Environment Light</h2>
+<h3 align="middle">probability debug</h3>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part3/debug.png" width="800px" />
+        <figcaption align="middle">Probability debug</figcaption>
+      </tr>
+    </table>
+  </div>
+
+  <br></br>
+
+  <h3 align="middle"> Uniform and importance sampling</h3>
+  <p> Uniform sampling is the naive way to distribute samples equally and probe all directions equally for incoming light. Every regions has the same weight. To solve this problem, importance sampling is introduced to increase the density of sample points in the regions that we are interested in, for example we want to concentrate more light source in the direction toward the bight light sources. The general idea is that each pixel is assigned a probability (non-uniform distribution) in the environment map based on the total flux passing through the solid angle it represents. It also improves the overall efficiency.  </p>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part3/bunny_unlit_uniform.png" width="700px" />
+        <figcaption align="middle">bunny_unlit uniform</figcaption>
+        <figcaption align="middle">For buny_unlit, there is not much visible difference between two schemes.</figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part3/bunny_unlit_s=4_l=64_m=5_importance.png" width="700px" />
+        <figcaption align="middle">bunny_unlit importance</figcaption>
+      </tr>
+    </table>
+  </div>
+
+<br></br>
+
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part3/bunny_microfacet_uniform.png" width="700px" />
+        <figcaption align="middle">bunny_microfacet_cu uniform</figcaption>
+        <figcaption align="middle">For bunny with microfacet of cu, it is slightly nosier on the sample points around the outlines or say edges of the bunny, while importance sampling focuses light sources on the bunny and gives a smoother surface.</figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part3/bunny_microfacet_cu_unlit_s=4_l=64_m=5_importance.png" width="700px" />
+        <figcaption align="middle">bunny_microfacet_cu importance</figcaption>
+      </tr>
+    </table>
+  </div>
+
+  <br></br>
+
+<h2 align="middle">Part 4: Depth of Field</h2>
+<p> Both aperture and focal distance controls the depth of field. </p> 
+<p> As you can see in below images, the smaller the diameter of the aperture, the smaller the f/stop, which is the larger the number, the more depth of field it is. From the first image with highest aperture value, a comparatively narrow depth of field. There is little focus on either side of the focus points. When the aperture value is decreasing, more subject are taken into focus on either side of the focus point. When aperture reaches 0, it is just same as pinhole camera, the whole image is focused.  </p>
+
+  <h3 align="middle"> Different aperture effect</h3>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part4/len_radius/dragon_b=0.6_d=5.png" width="500px" />
+        <figcaption align="middle">Aperture = 0.6, focal distance = 5</figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part4/len_radius/dragon_b=0.4_d=5.png" width="500px" />
+        <figcaption align="middle">Aperture = 0.4, focal distance = 5</figcaption>
+        <figcaption align="middle">You can see the big difference on the depth of field in focus. The head of the dragon in the below image is more clear than the one above. </figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part4/len_radius/dragon_b=0.2_d=5.png" width="500px" />
+        <figcaption align="middle">Aperture = 0.2, focal distance = 5</figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part4/len_radius/dragon_b=0.05_d=5.png" width="500px" />
+        <figcaption align="middle">Aperture = 0.05, focal distance = 5</figcaption>
+      </tr>
+    </table>
+  </div>
+
+  <br></br>
+
+  <h3 align="middle"> Different focal distance effect</h3>
+  <p> Depth of field refers to distance from the camera that are in focus. Choosing different focal distance can isolate some area with the object that we want to focus on. The wider focal distance helps to include the surrounding scene. As you can see in below images, the lower the focal distance, the more blurry the background is. The higher the focal distance, the more clear on the background. Since I chose a comparatively high aperture, so you can see a more narror depth of focus, which makes it easy to see the differnce of the area being focused and the area without focused.</p>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part4/focal_dis/dragon_b=0.6_d=4.png" width="500px" />
+        <figcaption align="middle">Aperture = 0.6, focal distance = 4</figcaption>
+        <figcaption align="middle">Small focal distance, the whole scene is blurry.</figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part4/focal_dis/dragon_b=0.6_d=4.5.png" width="500px" />
+        <figcaption align="middle">Aperture = 0.6, focal distance = 4.5</figcaption>
+        <figcaption align="middle">Since the head of the dragon comes before it's tail, so increase focal distance will first focus on the head of the dragon. You can see a bit clear on the dragon's mouth. </figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part4/focal_dis/dragon_b=0.6_d=5.png" width="500px" />
+        <figcaption align="middle">Aperture = 0.6, focal distance = 5</figcaption>
+        <figcaption align="middle">Then it comes to focus on the dragon's tail. </figcaption>
+      </tr>
+    </table>
+  </div>
+  <div align="center">
+    <table style="width=100%">
+      <tr>
+        <td align="middle">
+        <img src="part4/focal_dis/dragon_b=0.6_d=5.5.png" width="500px" />
+        <figcaption align="middle">Aperture = 0.6, focal distance = 5.5</figcaption>
+        <figcaption align="middle">Finally the box in the back gets to focused. You can see a bit clear of the edges of the box. </figcaption>
+      </tr>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>
